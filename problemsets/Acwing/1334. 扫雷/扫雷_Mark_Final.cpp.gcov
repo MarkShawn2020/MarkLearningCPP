@@ -1,0 +1,155 @@
+        -:    0:Source:扫雷_Mark_Final.cpp
+        -:    0:Graph:扫雷_Mark_Final.gcno
+        -:    0:Data:扫雷_Mark_Final.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1://
+        -:    2:// Created by 南川 on 2021/2/8.
+        -:    3://
+        -:    4:#include "cstdio"
+        -:    5:#include "array"
+        -:    6:#include "vector"
+        -:    7:#include "algorithm"
+        -:    8:#include "ctime"
+        -:    9:using namespace std;
+        -:   10:
+        -:   11:const int MAX_SIZE = 1000 + 2;
+        -:   12:
+        -:   13:struct Cell {
+        -:   14:    int isBom : 1;
+        -:   15:    int flagd : 1;
+        -:   16:    int swept : 1;
+        -:   17:    int booms : 4;
+        -:   18:} cells[MAX_SIZE][MAX_SIZE];
+        -:   19:
+        -:   20:int n, m, nSwept = 0, nBooms = 0, nSteps = 0, q = 0;
+        -:   21:int xy[8][2] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+        -:   22:array<array<int, 2>, MAX_SIZE * MAX_SIZE> que;
+        -:   23:
+        -:   24:
+      137:   25:bool outputSweep()
+        -:   26:{
+      137:   27:    if(!q) return printf("no cell detected\n");
+      137:   28:    printf("%d cell(s) detected\n", q);
+      137:   29:    sort(begin(que), begin(que) + q);
+     1026:   30:    for(int qi=0; qi<q; qi++)
+      889:   31:        printf("%d %d %d\n", que[qi][0], que[qi][1], cells[que[qi][0]][que[qi][1]].booms);
+      137:   32:    q = 0;                                      // reset
+      138:   33:    return nSwept + nBooms != n * m || printf("finish\n") && false;
+      137:   34:}
+        -:   35:
+      889:   36:inline void recordSweep(int x, int y){
+      889:   37:    cells[x][y].swept = true, ++nSwept;
+      889:   38:    que[q][0] = x, que[q][1] = y, ++q;
+     8001:   39:    for(auto & u : xy) {
+     7112:   40:        int i = x + u[0], j = y + u[1];
+     7112:   41:        if (i <= 0 || i > n || j <= 0 || j > m) continue;
+     1776:   42:        if (cells[i][j].isBom) ++cells[x][y].booms;
+        -:   43:    }
+      889:   44:}
+        -:   45:
+      137:   46:void coreSweep(int x, int y)
+        -:   47:{
+      137:   48:    recordSweep(x, y);
+     1026:   49:    for(int p=0; p < q; ++p)                        // 不断加入新的结点（非递归关键）
+     1592:   50:        if(!cells[que[p][0]][que[p][1]].booms)
+     6327:   51:            for(auto & u: xy) {
+     5624:   52:                int i = que[p][0] + u[0], j = que[p][1] + u[1];
+     5624:   53:                if(i <= 0 || i > n || j <= 0 || j > m) continue;
+     1404:   54:                cells[i][j].flagd = 0;
+     1404:   55:                if(!cells[i][j].swept)
+      752:   56:                    recordSweep(i, j);
+      703:   57:            }
+      137:   58:}
+        -:   59:
+      137:   60:bool runSafeSweep(int x, int y)
+        -:   61:{
+      137:   62:    coreSweep(x, y);
+      137:   63:    return outputSweep();
+        -:   64:}
+        -:   65:
+    #####:   66:bool runSafeDSweep(int x, int y)
+        -:   67:{
+    #####:   68:    for(auto & u : xy) {
+    #####:   69:        int i = x + u[0], j = y + u[1];
+    #####:   70:        if (i <= 0 || i > n || j <= 0 || j > m) continue;
+    #####:   71:        if(!cells[i][j].swept && !cells[i][j].flagd)
+    #####:   72:            coreSweep(i, j);
+        -:   73:    }
+    #####:   74:    return outputSweep();
+        -:   75:}
+        -:   76:
+    #####:   77:bool isDSweepEqual(int x, int y)
+        -:   78:{
+    #####:   79:    int diff = 0;
+    #####:   80:    for(auto & u : xy) {
+    #####:   81:        int i = x + u[0], j = y + u[1];
+    #####:   82:        if(i <= 0 || i > n || j <= 0 || j > m) continue;
+    #####:   83:        diff += cells[i][j].isBom - cells[i][j].flagd;
+        -:   84:    }
+    #####:   85:    return diff == 0;
+        -:   86:}
+        -:   87:
+    #####:   88:bool isDSweepSafe(int x, int y)
+        -:   89:{
+    #####:   90:    for(auto & u : xy) {
+    #####:   91:        int i = x + u[0], j = y + u[1];
+    #####:   92:        if (i <= 0 || i > n || j <= 0 || j > m) continue;
+    #####:   93:        if (cells[i][j].isBom ^ cells[i][j].flagd) return false;
+        -:   94:    }
+    #####:   95:    return true;
+    #####:   96:}
+        -:   97:
+      173:   98:bool runOperation(char & op)
+        -:   99:{
+      173:  100:    if(op == 'Q')                       return printf("give up\n") && false;
+        -:  101:
+      173:  102:    ++nSteps;       // add step since not quit
+        -:  103:    int x, y;
+      173:  104:    scanf("%d %d", &x, &y);
+      173:  105:    switch (op) {
+        -:  106:        case 'F':
+    #####:  107:            if(cells[x][y].swept)       return printf("swept\n");
+    #####:  108:            else                        return printf((cells[x][y].flagd ^= 1) ? "success\n" : "cancelled\n");
+        -:  109:        case 'S':
+      173:  110:            if(cells[x][y].swept)       return printf("swept\n");
+      137:  111:            else if(cells[x][y].flagd)  return printf("flagged\n");
+      137:  112:            else if(cells[x][y].isBom)  return printf("boom\ngame over\n") && false;
+      137:  113:            else                        return runSafeSweep(x, y);
+        -:  114:        case 'D':
+    #####:  115:            if(!cells[x][y].swept)      return printf("not swept\n");
+    #####:  116:            else if(!cells[x][y].booms || !isDSweepEqual(x, y))
+    #####:  117:                                        return printf("failed\n");
+    #####:  118:            else if(!isDSweepSafe(x,y)) return printf("boom\ngame over\n") && false;
+    #####:  119:            else                        return runSafeDSweep(x, y);
+        -:  120:    }
+    #####:  121:    return true;
+      173:  122:}
+        -:  123:
+        1:  124:void runAll()
+        -:  125:{
+        1:  126:    scanf("%d %d", &n, &m);
+        -:  127:    char s[MAX_SIZE];
+        2:  128:    for(int i=1; i<=n; i++) {
+        1:  129:        scanf("%s", s + 1);
+     1001:  130:        for(int j=1; j<=m; j++)
+     1111:  131:            if(s[j] == '*')
+      111:  132:                ++cells[i][j].isBom, ++nBooms;
+        1:  133:    }
+        -:  134:    char ops[7];
+      173:  135:    while (scanf("%s", ops) && runOperation(ops[0]));
+        1:  136:    printf("total step %d", nSteps);
+        1:  137:}
+        -:  138:
+        1:  139:int main()
+        -:  140:{
+        1:  141:    if(freopen("/Users/mark/MarkLearningCPP/Acwing/1334. 扫雷/case3.txt", "r", stdin))
+        -:  142:    {
+        1:  143:        auto start = clock();
+        1:  144:        runAll();
+        1:  145:        auto end = clock();
+        1:  146:        printf("\ntime: %.4f ms", (double)(end-start) / CLOCKS_PER_SEC * 1000);
+        1:  147:    } else
+    #####:  148:        runAll();
+        1:  149:    return 0;
+        -:  150:}

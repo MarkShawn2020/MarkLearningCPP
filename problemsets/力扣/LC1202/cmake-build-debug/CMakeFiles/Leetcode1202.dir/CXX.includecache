@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/mark/CLionProjects/Leetcode1202/main.cpp
+iostream
+/Users/mark/CLionProjects/Leetcode1202/iostream
+vector
+/Users/mark/CLionProjects/Leetcode1202/vector
+queue
+/Users/mark/CLionProjects/Leetcode1202/queue
+fstream
+/Users/mark/CLionProjects/Leetcode1202/fstream
+sstream
+/Users/mark/CLionProjects/Leetcode1202/sstream
+unordered_map
+/Users/mark/CLionProjects/Leetcode1202/unordered_map
+map
+/Users/mark/CLionProjects/Leetcode1202/map
+set
+/Users/mark/CLionProjects/Leetcode1202/set
+
